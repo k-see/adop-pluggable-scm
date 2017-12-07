@@ -22,8 +22,9 @@ public class BitbucketcloudSCMProviderFactory implements SCMProviderFactory {
     String scmProtocol = scmProviderProperties.getProperty("scm.protocol");
     int scmPort = Integer.parseInt(scmProviderProperties.getProperty("scm.port"));
 
-    // Env veriables for Bitbucketcloud REST
+    // Env variables for Bitbucketcloud REST
     String bitbucketcloudEndpoint = scmProviderProperties.getProperty("bitbucketcloud.endpoint");
+    String bitbucketcloudURL = scmProviderProperties.getProperty("bitbucketcloud.url");
     String bitbucketcloudEndpointContext = scmProviderProperties.getProperty("bitbucketcloud.endpoint.context");
     String bitbucketcloudProtocol = scmProviderProperties.getProperty("bitbucketcloud.protocol");
     int bitbucketcloudPort = Integer.parseInt(scmProviderProperties.getProperty("bitbucketcloud.port"));
@@ -32,6 +33,7 @@ public class BitbucketcloudSCMProviderFactory implements SCMProviderFactory {
             scmPort,
             BitbucketcloudSCMProtocol.valueOf(this.validateProperties("scm.protocol", scmProtocol.toUpperCase())),
             this.validateProperties("bitbucketcloud.endpoint", bitbucketcloudEndpoint),
+            this.validateProperties("bitbucketcloud.url", bitbucketcloudURL),
             bitbucketcloudEndpointContext,
             BitbucketcloudSCMProtocol.valueOf(this.validateProperties("bitbucketcloud.protocol", bitbucketcloudProtocol.toUpperCase())),
             bitbucketcloudPort

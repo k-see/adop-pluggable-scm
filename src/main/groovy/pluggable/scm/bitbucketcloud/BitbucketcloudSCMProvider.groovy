@@ -18,6 +18,7 @@ public class BitbucketcloudSCMProvider implements SCMProvider {
 
   // Bitbucketcloud specific variables.
   private final String bitbucketcloudEndpoint;
+  private final String bitbucketcloudURL;
   private final String bitbucketcloudEndpointContext;
   private final int bitbucketcloudPort;
   private final BitbucketcloudSCMProtocol bitbucketcloudProtocol;
@@ -29,7 +30,8 @@ public class BitbucketcloudSCMProvider implements SCMProvider {
   *
   * @param scmPort scm port
   * @param scmProtocol scm clone protocol
-  * @param bitbucketcloudEndpoint host url e.g. 10.0.0.1, innersource.accenture.com
+  * @param bitbucketcloudEndpoint host api e.g. 10.0.0.1, innersource.accenture.com
+  * @param bitbucketcloudURL host url e.g. 10.0.0.1, innersource.accenture.com
   * @param bitbucketcloudEndpointContext bitbucketcloud host endpoint context.
   * @param bitbucketcloudProtocol protocol which will be used for HTTP requests.
   * @param bitbucketcloudPort bitbucketcloud API port.
@@ -37,6 +39,7 @@ public class BitbucketcloudSCMProvider implements SCMProvider {
   public BitbucketcloudSCMProvider(int scmPort,
                               BitbucketcloudSCMProtocol scmProtocol,
                               String bitbucketcloudEndpoint,
+                              String bitbucketcloudURL,
                               String bitbucketcloudEndpointContext,
                               BitbucketcloudSCMProtocol bitbucketcloudProtocol,
                               int bitbucketcloudPort){
@@ -44,6 +47,7 @@ public class BitbucketcloudSCMProvider implements SCMProvider {
       this.scmPort = scmPort;
       this.scmProtocol = scmProtocol;
       this.bitbucketcloudEndpoint = bitbucketcloudEndpoint;
+      this.bitbucketcloudURL = bitbucketcloudURL;
       this.bitbucketcloudEndpointContext = bitbucketcloudEndpointContext;
       this.bitbucketcloudPort = bitbucketcloudPort;
       this.bitbucketcloudProtocol = bitbucketcloudProtocol;
@@ -66,28 +70,25 @@ public class BitbucketcloudSCMProvider implements SCMProvider {
 
       StringBuffer url = new StringBuffer("")
 
-      url.append(this.scmProtocol);
-      url.append("://");
+      
       switch(this.scmProtocol){
         case BitbucketcloudSCMProtocol.SSH:
           url.append("git@");
           break;
         case BitbucketcloudSCMProtocol.HTTP:
+          url.append(this.scmProtocol);
+          url.append("://");
         case BitbucketcloudSCMProtocol.HTTPS:
+          url.append(this.scmProtocol);
+          url.append("://");
           break;
         default:
           throw new IllegalArgumentException("SCM Protocol type not supported.");
           break;
       }
 
-      url.append(this.bitbucketcloudEndpoint);
+      url.append(this.bitbucketcloudURL);
       url.append(":");
-      url.append(this.scmPort);
-      url.append(this.bitbucketcloudEndpointContext);
-
-      if(!url.toString().endsWith("/")){
-        url.append("/")
-      }
 
       if((this.scmProtocol == BitbucketcloudSCMProtocol.HTTP) ||
          (this.scmProtocol == BitbucketcloudSCMProtocol.HTTPS)
@@ -171,7 +172,7 @@ public class BitbucketcloudSCMProvider implements SCMProvider {
 
           def tempScript = new File(tempDir + '/shell_script.sh')
 
-          tempScript << "git clone " + BitbucketcloudSCMProtocol.HTTPS.toString() + "://" + this.bitbucketcloudUsername + ":" + this.urlEncode(this.bitbucketcloudPassword) + "@" + this.bitbucketcloudEndpoint + "/scm/" + repoNamespace + "/" + repoName + ".git " + tempDir + "/" + repoName + "\n"
+          tempScript << "git clone " + BitbucketcloudSCMProtocol.HTTPS.toString() + "://" + repoNamespace + ":" + this.urlEncode(this.bitbucketcloudPassword) + "@" + this.bitbucketcloudURL + "/" + repoNamespace + "/" + repoName + ".git " + tempDir + "/" + repoName + "\n"
           def gitDir = "--git-dir=" + tempDir + "/" + repoName + "/.git"
           tempScript << "git " + gitDir + " remote add source " + repo + "\n"
           tempScript << "git " + gitDir + " fetch source" + "\n"
@@ -226,7 +227,7 @@ public class BitbucketcloudSCMProvider implements SCMProvider {
     */
     public Closure trigger(String projectName, String repoName, String branchName) {
         return {
-              bitbucketcloudPush()
+              bitbucketPush()
               scm('')
         }
     }
